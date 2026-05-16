@@ -4,26 +4,27 @@ const authMiddleware = require('../middleware/auth')
 
 const router = Router()
 
-// List all blogs (admin, includes drafts)
+// List all blogs (admin, includes drafts) — sorted by updated_at
 router.get('/all', authMiddleware, (req, res) => {
   const blogs = db.prepare(`
     SELECT id, title, substr(content, 1, 200) AS summary, published, created_at, updated_at
-    FROM blogs ORDER BY created_at DESC
+    FROM blogs ORDER BY updated_at DESC
   `).all()
   res.json(blogs)
 })
 
-// List published blogs
+// List published blogs — default sort by updated_at, ?sort=created for created_at
 router.get('/list', (req, res) => {
+  const orderCol = req.query.sort === 'created' ? 'created_at' : 'updated_at'
   const blogs = db.prepare(`
     SELECT id, title, substr(content, 1, 200) AS summary, created_at, updated_at
     FROM blogs WHERE published = 1
-    ORDER BY created_at DESC
+    ORDER BY ${orderCol} DESC
   `).all()
   res.json(blogs)
 })
 
-// Search published blogs (title + content)
+// Search published blogs (title + content) — sorted by updated_at
 router.get('/search', (req, res) => {
   const q = req.query.q || ''
   if (!q.trim()) {
@@ -33,18 +34,18 @@ router.get('/search', (req, res) => {
   const blogs = db.prepare(`
     SELECT id, title, substr(content, 1, 200) AS summary, created_at, updated_at
     FROM blogs WHERE published = 1 AND (title LIKE ? OR content LIKE ?)
-    ORDER BY created_at DESC
+    ORDER BY updated_at DESC
   `).all(keyword, keyword)
   res.json(blogs)
 })
 
-// Recent published blogs (last 30 days)
+// Recent published blogs (last 30 days) — sorted by updated_at
 router.get('/recent', (req, res) => {
   const blogs = db.prepare(`
     SELECT id, title, substr(content, 1, 200) AS summary, created_at, updated_at
     FROM blogs WHERE published = 1
     AND created_at >= datetime('now', 'localtime', '-30 days')
-    ORDER BY created_at DESC
+    ORDER BY updated_at DESC
   `).all()
   res.json(blogs)
 })

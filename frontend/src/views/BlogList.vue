@@ -35,6 +35,7 @@ async function loadBlogs() {
   try {
     let url = '/blog/list'
     if (mode.value === 'recent') url = '/blog/recent'
+    if (mode.value === 'toc') url = '/blog/list?sort=created'
     const { data } = await api.get(url)
     blogs.value = data
   } catch {

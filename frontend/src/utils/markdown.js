@@ -63,16 +63,42 @@ md.renderer.rules.math_block = (tokens, idx) => {
   }
 }
 
+function splitCodeBlocks(content) {
+  // Split by fenced code blocks (```...```) so we only transform non-code text
+  const parts = content.split(/(```[\s\S]*?```)/g)
+  return {
+    parts,
+    processNonCode(fn) {
+      return parts.map((part, i) => (i % 2 === 0 ? fn(part) : part)).join('')
+    },
+  }
+}
+
+function preserveSpaces(content) {
+  const { processNonCode } = splitCodeBlocks(content)
+  return processNonCode((text) =>
+    text.replace(/ {2,}/g, (match) => ' &nbsp;'.repeat(match.length - 1))
+  )
+}
+
 function preserveBlankLines(content) {
-  // Turn 3+ consecutive newlines (multiple blank lines) into
-  // paragraph break + explicit <br> tags so they render as visible space.
-  return content.replace(/\n{3,}/g, (match) => {
-    return '\n\n' + '<br>\n'.repeat(match.length - 2) + '\n'
-  })
+  const { processNonCode } = splitCodeBlocks(content)
+  return processNonCode((text) =>
+    text.replace(/\n{3,}/g, (match) =>
+      '\n\n' + '<br>\n'.repeat(match.length - 2) + '\n'
+    )
+  )
+}
+
+function normalize(content) {
+  return content.replace(/\r\n/g, '\n')
 }
 
 export function renderMarkdown(content) {
-  return md.render(preserveBlankLines(content || ''))
+  let text = normalize(content || '')
+  text = preserveSpaces(text)
+  text = preserveBlankLines(text)
+  return md.render(text)
 }
 
 export default md

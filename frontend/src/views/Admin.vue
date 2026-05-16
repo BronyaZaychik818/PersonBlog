@@ -87,6 +87,7 @@ function goEdit(id) {
             <tr>
               <th>标题</th>
               <th>创建时间</th>
+              <th>最后更新</th>
               <th>状态</th>
               <th>操作</th>
             </tr>
@@ -95,6 +96,7 @@ function goEdit(id) {
             <tr v-for="blog in draftBlogs" :key="blog.id">
               <td>{{ blog.title }}</td>
               <td>{{ formatDate(blog.created_at) }}</td>
+              <td>{{ formatDate(blog.updated_at) }}</td>
               <td><span class="status draft">草稿</span></td>
               <td class="actions">
                 <button @click="goEdit(blog.id)" class="action-btn">编辑</button>
@@ -113,6 +115,7 @@ function goEdit(id) {
             <tr>
               <th>标题</th>
               <th>发布时间</th>
+              <th>最后更新</th>
               <th>状态</th>
               <th>操作</th>
             </tr>
@@ -121,6 +124,7 @@ function goEdit(id) {
             <tr v-for="blog in publishedBlogs" :key="blog.id">
               <td>{{ blog.title }}</td>
               <td>{{ formatDate(blog.created_at) }}</td>
+              <td>{{ formatDate(blog.updated_at) }}</td>
               <td><span class="status published">已发布</span></td>
               <td class="actions">
                 <button @click="goEdit(blog.id)" class="action-btn">编辑</button>
